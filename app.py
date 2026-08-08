@@ -17,7 +17,7 @@ st.set_page_config(
 
 
 # ============================================================
-# LOAD TRAINED MODEL AND ENCODERS
+# LOAD MODEL
 # ============================================================
 
 model = joblib.load("futureme_model.pkl")
@@ -47,12 +47,10 @@ st.info(
 
 st.header("📝 Enter Your Information")
 
-
 gender = st.selectbox(
     "Gender",
     ["Male", "Female"]
 )
-
 
 age = st.number_input(
     "Age",
@@ -61,12 +59,10 @@ age = st.number_input(
     value=25
 )
 
-
 occupation = st.selectbox(
     "Occupation",
     encoders["Occupation"].classes_.tolist()
 )
-
 
 sleep_duration = st.number_input(
     "Sleep Duration (hours)",
@@ -76,7 +72,6 @@ sleep_duration = st.number_input(
     step=0.1
 )
 
-
 sleep_quality = st.slider(
     "Quality of Sleep",
     min_value=1,
@@ -85,13 +80,11 @@ sleep_quality = st.slider(
     step=1
 )
 
-
 physical_activity = st.number_input(
     "Physical Activity Level",
     min_value=0,
     value=50
 )
-
 
 stress = st.slider(
     "Stress Level",
@@ -101,12 +94,10 @@ stress = st.slider(
     step=1
 )
 
-
 bmi = st.selectbox(
     "BMI Category",
     encoders["BMI Category"].classes_.tolist()
 )
-
 
 heart_rate = st.number_input(
     "Heart Rate",
@@ -114,7 +105,6 @@ heart_rate = st.number_input(
     max_value=200,
     value=75
 )
-
 
 daily_steps = st.number_input(
     "Daily Steps",
@@ -124,13 +114,13 @@ daily_steps = st.number_input(
 
 
 # ============================================================
-# ANALYZE BUTTON
+# ANALYZE
 # ============================================================
 
 if st.button("🔍 Analyze with FutureMe"):
 
     # --------------------------------------------------------
-    # CREATE USER DATAFRAME
+    # CREATE DATA
     # --------------------------------------------------------
 
     user_data = pd.DataFrame([{
@@ -148,10 +138,14 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # --------------------------------------------------------
-    # ENCODE CATEGORICAL VARIABLES
+    # ENCODE CATEGORIES
     # --------------------------------------------------------
 
-    for col in ["Gender", "Occupation", "BMI Category"]:
+    for col in [
+        "Gender",
+        "Occupation",
+        "BMI Category"
+    ]:
 
         user_data[col] = encoders[col].transform(
             user_data[col]
@@ -159,7 +153,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # --------------------------------------------------------
-    # MAKE SURE FEATURE ORDER MATCHES TRAINING
+    # FEATURE ORDER
     # --------------------------------------------------------
 
     user_data = user_data[
@@ -190,7 +184,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # MENTAL RISK INDICATOR
+    # MENTAL RISK
     # ========================================================
 
     mental_risk = (
@@ -200,7 +194,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # PHYSICAL RISK INDICATOR
+    # PHYSICAL RISK
     # ========================================================
 
     bmi_score = {
@@ -210,7 +204,6 @@ if st.button("🔍 Analyze with FutureMe"):
         "Obese": 3
     }.get(bmi, 1)
 
-
     physical_risk = (
         bmi_score +
         (10000 - daily_steps) / 5000
@@ -218,7 +211,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # COMBINED WELLBEING SCORE
+    # WELLBEING SCORE
     # ========================================================
 
     wellbeing_risk = (
@@ -228,7 +221,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # DETERMINE RISK LEVEL
+    # RISK LEVEL
     # ========================================================
 
     if wellbeing_risk < 4:
@@ -265,7 +258,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # --------------------------------------------------------
-    # WELLBEING SCORE
+    # WELLBEING
     # --------------------------------------------------------
 
     st.subheader("🌱 Wellbeing Risk")
@@ -280,166 +273,46 @@ if st.button("🔍 Analyze with FutureMe"):
     )
 
 
-   # ========================================================
-# EXPLAINABLE AI
-# ========================================================
-
-st.divider()
-
-st.header("🔎 Why did FutureMe make this prediction?")
-
-st.write(
-    "FutureMe uses the trained machine-learning model to identify "
-    "which factors had the greatest influence on its prediction."
-)
-
-try:
-
-    # Create SHAP explainer
-    explainer = shap.TreeExplainer(model)
-
-    # Calculate SHAP values
-    shap_explanation = explainer(user_data)
-
-    # Get SHAP values
-    shap_values = shap_explanation.values
-
-    # SHAP may return:
-    # (samples, features)
-    # or
-    # (samples, features, classes)
-
-    if len(shap_values.shape) == 3:
-
-        # Select the predicted class
-        values = shap_values[0, :, prediction[0]]
-
-    elif len(shap_values.shape) == 2:
-
-        values = shap_values[0]
-
-    else:
-
-        values = shap_values
-
-
-    # Create explanation table
-    explanation = pd.DataFrame({
-        "Feature": user_data.columns,
-        "Impact": values
-    })
-
-
-    # Absolute influence
-    explanation["Absolute Impact"] = (
-        explanation["Impact"].abs()
-    )
-
-
-    # Sort by importance
-    explanation = explanation.sort_values(
-        "Absolute Impact",
-        ascending=False
-    )
-
-
-    # Get top 5
-    top_features = explanation.head(5)
-
-
-    st.subheader(
-        "Top factors influencing the prediction"
-    )
-
-
-    # Display explanations
-    for _, row in top_features.iterrows():
-
-        feature = row["Feature"]
-        impact = row["Impact"]
-
-        if impact > 0:
-
-            direction = "increased"
-
-        else:
-
-            direction = "decreased"
-
-        st.write(
-            f"**{feature}** — "
-            f"{direction} the model's prediction influence."
-        )
-
-
     # ========================================================
-    # FEATURE INFLUENCE CHART
+    # EXPLAINABLE AI
     # ========================================================
 
-    st.subheader("📈 Feature Influence")
+    st.divider()
 
-
-    chart_data = top_features.sort_values(
-        "Impact"
-    )
-
-
-    fig, ax = plt.subplots()
-
-
-    ax.barh(
-        chart_data["Feature"],
-        chart_data["Impact"]
-    )
-
-
-    ax.set_xlabel(
-        "Model influence"
-    )
-
-
-    ax.set_ylabel(
-        "Feature"
-    )
-
-
-    ax.set_title(
-        "Top Factors Influencing Prediction"
-    )
-
-
-    st.pyplot(fig)
-
-    plt.close(fig)
-
-
-    st.caption(
-        "This chart explains how the model used the "
-        "provided information. It does not show medical "
-        "causes or diagnoses."
-    )
-
-
-except Exception as e:
-
-    st.warning(
-        "The prediction was successful, but the "
-        "Explainable AI section could not be generated."
-    )
+    st.header("🔎 Why did FutureMe make this prediction?")
 
     st.write(
-        "SHAP error:"
+        "The model analyzes the information entered and "
+        "uses patterns learned from the training dataset."
     )
 
-    st.code(str(e))
+    try:
+
+        # Create SHAP TreeExplainer
+        explainer = shap.TreeExplainer(model)
+
+        # Calculate SHAP values
+        shap_result = explainer(user_data)
+
+        # Get values
+        shap_values = shap_result.values
+
 
         # ----------------------------------------------------
-        # HANDLE DIFFERENT SHAP OUTPUT FORMATS
+        # HANDLE SHAP OUTPUT
         # ----------------------------------------------------
 
-        if isinstance(shap_values, list):
+        if len(shap_values.shape) == 3:
 
-            values = shap_values[prediction[0]]
+            values = shap_values[
+                0,
+                :,
+                prediction[0]
+            ]
+
+        elif len(shap_values.shape) == 2:
+
+            values = shap_values[0]
 
         else:
 
@@ -452,7 +325,7 @@ except Exception as e:
 
         explanation = pd.DataFrame({
             "Feature": user_data.columns,
-            "Impact": values[0]
+            "Impact": values
         })
 
 
@@ -467,25 +340,22 @@ except Exception as e:
         )
 
 
-        # ----------------------------------------------------
-        # TOP 5 FEATURES
-        # ----------------------------------------------------
-
         top_features = explanation.head(5)
 
 
-        st.write(
-            "### Top factors influencing the prediction"
+        # ----------------------------------------------------
+        # DISPLAY TOP FEATURES
+        # ----------------------------------------------------
+
+        st.subheader(
+            "Top factors influencing the prediction"
         )
 
-
-        # ----------------------------------------------------
-        # DISPLAY FACTORS
-        # ----------------------------------------------------
 
         for _, row in top_features.iterrows():
 
             feature = row["Feature"]
+
             impact = row["Impact"]
 
 
@@ -505,12 +375,10 @@ except Exception as e:
 
 
         # ----------------------------------------------------
-        # SHAP BAR CHART
+        # CHART
         # ----------------------------------------------------
 
-        st.write(
-            "### 📈 Feature Influence"
-        )
+        st.subheader("📈 Feature Influence")
 
 
         chart_data = top_features.sort_values(
@@ -548,9 +416,9 @@ except Exception as e:
 
 
         st.caption(
-            "Higher absolute values indicate a greater influence "
-            "on the model's prediction. This explains the model's "
-            "behavior and does not indicate medical causation."
+            "This explains how the model used the "
+            "provided information. It does not indicate "
+            "medical causation."
         )
 
 
@@ -561,9 +429,9 @@ except Exception as e:
             "Explainable AI section could not be generated."
         )
 
-        st.caption(
-            f"Technical information: {str(e)}"
-        )
+        st.write("SHAP error:")
+
+        st.code(str(e))
 
 
     # ========================================================
@@ -573,7 +441,6 @@ except Exception as e:
     st.divider()
 
     st.header("💡 Health Awareness")
-
 
     suggestions = []
 
@@ -610,16 +477,12 @@ except Exception as e:
 
         suggestions.append(
             "❤️ Your entered heart rate is relatively high. "
-            "If this is unusual for you, consider discussing it "
-            "with a qualified healthcare professional."
+            "If this is unusual for you, consider discussing "
+            "it with a qualified healthcare professional."
         )
 
 
-    # --------------------------------------------------------
-    # DISPLAY SUGGESTIONS
-    # --------------------------------------------------------
-
-    if len(suggestions) > 0:
+    if suggestions:
 
         for suggestion in suggestions:
 
@@ -628,13 +491,13 @@ except Exception as e:
     else:
 
         st.success(
-            "Your entered values do not trigger any of "
-            "FutureMe's basic awareness suggestions."
+            "Your entered values do not trigger any "
+            "of FutureMe's basic awareness suggestions."
         )
 
 
     # ========================================================
-    # RISK SCORE BREAKDOWN
+    # RISK BREAKDOWN
     # ========================================================
 
     st.divider()
@@ -677,6 +540,6 @@ except Exception as e:
     st.caption(
         "⚠️ FutureMe is an educational health-awareness "
         "project and is not a medical diagnostic system. "
-        "Predictions and risk indicators should not be used "
-        "to make medical decisions."
+        "Predictions and risk indicators should not be "
+        "used to make medical decisions."
     )
