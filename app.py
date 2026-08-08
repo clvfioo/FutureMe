@@ -280,31 +280,158 @@ if st.button("🔍 Analyze with FutureMe"):
     )
 
 
-    # ========================================================
-    # EXPLAINABLE AI
-    # ========================================================
+   # ========================================================
+# EXPLAINABLE AI
+# ========================================================
 
-    st.divider()
+st.divider()
 
-    st.header("🔎 Why did FutureMe make this prediction?")
+st.header("🔎 Why did FutureMe make this prediction?")
 
-    st.write(
-        "The model looks at the information you entered and "
-        "uses patterns learned from the training dataset. "
-        "The factors below show which inputs had the greatest "
-        "influence on the model's prediction."
+st.write(
+    "FutureMe uses the trained machine-learning model to identify "
+    "which factors had the greatest influence on its prediction."
+)
+
+try:
+
+    # Create SHAP explainer
+    explainer = shap.TreeExplainer(model)
+
+    # Calculate SHAP values
+    shap_explanation = explainer(user_data)
+
+    # Get SHAP values
+    shap_values = shap_explanation.values
+
+    # SHAP may return:
+    # (samples, features)
+    # or
+    # (samples, features, classes)
+
+    if len(shap_values.shape) == 3:
+
+        # Select the predicted class
+        values = shap_values[0, :, prediction[0]]
+
+    elif len(shap_values.shape) == 2:
+
+        values = shap_values[0]
+
+    else:
+
+        values = shap_values
+
+
+    # Create explanation table
+    explanation = pd.DataFrame({
+        "Feature": user_data.columns,
+        "Impact": values
+    })
+
+
+    # Absolute influence
+    explanation["Absolute Impact"] = (
+        explanation["Impact"].abs()
     )
 
 
-    try:
+    # Sort by importance
+    explanation = explanation.sort_values(
+        "Absolute Impact",
+        ascending=False
+    )
 
-        # Create SHAP explainer
-        explainer = shap.TreeExplainer(model)
 
-        shap_values = explainer.shap_values(
-            user_data
+    # Get top 5
+    top_features = explanation.head(5)
+
+
+    st.subheader(
+        "Top factors influencing the prediction"
+    )
+
+
+    # Display explanations
+    for _, row in top_features.iterrows():
+
+        feature = row["Feature"]
+        impact = row["Impact"]
+
+        if impact > 0:
+
+            direction = "increased"
+
+        else:
+
+            direction = "decreased"
+
+        st.write(
+            f"**{feature}** — "
+            f"{direction} the model's prediction influence."
         )
 
+
+    # ========================================================
+    # FEATURE INFLUENCE CHART
+    # ========================================================
+
+    st.subheader("📈 Feature Influence")
+
+
+    chart_data = top_features.sort_values(
+        "Impact"
+    )
+
+
+    fig, ax = plt.subplots()
+
+
+    ax.barh(
+        chart_data["Feature"],
+        chart_data["Impact"]
+    )
+
+
+    ax.set_xlabel(
+        "Model influence"
+    )
+
+
+    ax.set_ylabel(
+        "Feature"
+    )
+
+
+    ax.set_title(
+        "Top Factors Influencing Prediction"
+    )
+
+
+    st.pyplot(fig)
+
+    plt.close(fig)
+
+
+    st.caption(
+        "This chart explains how the model used the "
+        "provided information. It does not show medical "
+        "causes or diagnoses."
+    )
+
+
+except Exception as e:
+
+    st.warning(
+        "The prediction was successful, but the "
+        "Explainable AI section could not be generated."
+    )
+
+    st.write(
+        "SHAP error:"
+    )
+
+    st.code(str(e))
 
         # ----------------------------------------------------
         # HANDLE DIFFERENT SHAP OUTPUT FORMATS
