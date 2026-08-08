@@ -26,26 +26,201 @@ target_encoder = joblib.load("futureme_target_encoder.pkl")
 
 
 # ============================================================
-# TITLE
+# CUSTOM CSS
 # ============================================================
 
-st.title("🌱 FutureMe")
+st.markdown(
+    """
+    <style>
+
+    .main-title {
+        font-size: 52px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 0px;
+    }
+
+    .subtitle {
+        font-size: 22px;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 20px;
+    }
+
+    .description {
+        text-align: center;
+        font-size: 17px;
+        margin-bottom: 30px;
+    }
+
+    .feature-card {
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(128,128,128,0.25);
+        min-height: 180px;
+    }
+
+    .feature-title {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .feature-text {
+        font-size: 15px;
+    }
+
+    .section-title {
+        font-size: 30px;
+        font-weight: 600;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# LANDING PAGE
+# ============================================================
+
+st.markdown(
+    '<div class="main-title">🌱 FutureMe</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="subtitle">Understand your wellbeing. '
+    'Understand your future.</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div class="description">
+    FutureMe uses machine learning to analyze lifestyle and
+    sleep-related information, explain the factors influencing
+    its prediction, and provide educational health-awareness
+    feedback.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# FEATURE CARDS
+# ============================================================
+
+col1, col2, col3 = st.columns(3)
+
+
+with col1:
+
+    st.markdown(
+        """
+        <div class="feature-card">
+        <div class="feature-title">🤖 AI Prediction</div>
+        <br>
+        <div class="feature-text">
+        A machine-learning model analyzes the information
+        entered and identifies patterns associated with
+        sleep-related categories.
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+with col2:
+
+    st.markdown(
+        """
+        <div class="feature-card">
+        <div class="feature-title">🔎 Explainable AI</div>
+        <br>
+        <div class="feature-text">
+        SHAP helps show which factors had the greatest
+        influence on the model's prediction.
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+with col3:
+
+    st.markdown(
+        """
+        <div class="feature-card">
+        <div class="feature-title">💡 Awareness</div>
+        <br>
+        <div class="feature-text">
+        FutureMe provides educational awareness suggestions
+        based on the information entered.
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# HOW IT WORKS
+# ============================================================
+
+st.divider()
+
+st.markdown(
+    '<div class="section-title">⚙️ How FutureMe Works</div>',
+    unsafe_allow_html=True
+)
 
 st.write(
-    "### AI-powered health awareness and wellbeing prediction system"
+    """
+    **1️⃣ Enter your information**  
+    Provide information about sleep, activity, stress,
+    and other lifestyle factors.
+
+    **2️⃣ FutureMe processes the information**  
+    The data is converted into the format required by the
+    trained machine-learning model.
+
+    **3️⃣ AI analyzes the patterns**  
+    The trained model compares the information with patterns
+    learned from the dataset.
+
+    **4️⃣ FutureMe generates a prediction**  
+    The model produces a predicted sleep-related category.
+
+    **5️⃣ Explainable AI explains the result**  
+    SHAP identifies the features that had the greatest
+    influence on the prediction.
+
+    **6️⃣ FutureMe provides awareness feedback**  
+    The system highlights areas that may deserve attention.
+    """
 )
 
-st.info(
-    "FutureMe is an educational health-awareness prototype. "
-    "It does not diagnose medical conditions."
-)
+
+st.divider()
 
 
 # ============================================================
-# USER INPUTS
+# INPUT SECTION
 # ============================================================
 
-st.header("📝 Enter Your Information")
+st.markdown(
+    '<div class="section-title">📝 Enter Your Information</div>',
+    unsafe_allow_html=True
+)
+
+st.write(
+    "Enter the following information to generate your "
+    "FutureMe analysis."
+)
 
 
 gender = st.selectbox(
@@ -127,7 +302,10 @@ daily_steps = st.number_input(
 # ANALYZE BUTTON
 # ============================================================
 
-if st.button("🔍 Analyze with FutureMe"):
+if st.button(
+    "🔍 Analyze with FutureMe",
+    use_container_width=True
+):
 
     # ========================================================
     # CREATE USER DATA
@@ -163,7 +341,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # KEEP EXACT TRAINING FEATURE ORDER
+    # EXACT TRAINING FEATURE ORDER
     # ========================================================
 
     user_data = user_data[
@@ -261,10 +439,10 @@ if st.button("🔍 Analyze with FutureMe"):
     # RESULT DASHBOARD
     # ========================================================
 
-    col1, col2, col3 = st.columns(3)
+    result_col1, result_col2, result_col3 = st.columns(3)
 
 
-    with col1:
+    with result_col1:
 
         st.metric(
             "😴 Sleep Prediction",
@@ -272,7 +450,7 @@ if st.button("🔍 Analyze with FutureMe"):
         )
 
 
-    with col2:
+    with result_col2:
 
         st.metric(
             "🌱 Wellbeing Score",
@@ -280,7 +458,7 @@ if st.button("🔍 Analyze with FutureMe"):
         )
 
 
-    with col3:
+    with result_col3:
 
         st.metric(
             "📊 Risk Level",
@@ -289,7 +467,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # RISK LEVEL MESSAGE
+    # RISK MESSAGE
     # ========================================================
 
     if risk_level == "Low":
@@ -320,7 +498,9 @@ if st.button("🔍 Analyze with FutureMe"):
 
     st.divider()
 
-    st.header("🔎 Why did FutureMe make this prediction?")
+    st.header(
+        "🔎 Why did FutureMe make this prediction?"
+    )
 
     st.write(
         "FutureMe uses patterns learned from its training "
@@ -332,10 +512,8 @@ if st.button("🔍 Analyze with FutureMe"):
 
     try:
 
-        # Create SHAP explainer
         explainer = shap.TreeExplainer(model)
 
-        # Calculate SHAP values
         shap_result = explainer(user_data)
 
         shap_values = shap_result.values
@@ -363,7 +541,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         # ----------------------------------------------------
-        # CREATE EXPLANATION TABLE
+        # EXPLANATION TABLE
         # ----------------------------------------------------
 
         explanation = pd.DataFrame({
@@ -387,7 +565,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         # ----------------------------------------------------
-        # DISPLAY TOP FACTORS
+        # TOP FACTORS
         # ----------------------------------------------------
 
         st.subheader(
@@ -418,10 +596,12 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         # ----------------------------------------------------
-        # FEATURE INFLUENCE CHART
+        # FEATURE CHART
         # ----------------------------------------------------
 
-        st.subheader("📈 Feature Influence")
+        st.subheader(
+            "📈 Feature Influence"
+        )
 
 
         chart_data = top_features.sort_values(
@@ -472,9 +652,13 @@ if st.button("🔍 Analyze with FutureMe"):
             "Explainable AI section could not be generated."
         )
 
-        st.write("SHAP error:")
+        st.write(
+            "SHAP error:"
+        )
 
-        st.code(str(e))
+        st.code(
+            str(e)
+        )
 
 
     # ========================================================
@@ -483,7 +667,9 @@ if st.button("🔍 Analyze with FutureMe"):
 
     st.divider()
 
-    st.header("💡 Personalized Health Awareness")
+    st.header(
+        "💡 Personalized Health Awareness"
+    )
 
 
     suggestions = []
@@ -565,7 +751,9 @@ if st.button("🔍 Analyze with FutureMe"):
 
         for suggestion in suggestions:
 
-            st.write(suggestion)
+            st.write(
+                suggestion
+            )
 
     else:
 
@@ -581,13 +769,15 @@ if st.button("🔍 Analyze with FutureMe"):
 
     st.divider()
 
-    st.header("📋 Risk Score Breakdown")
+    st.header(
+        "📋 Risk Score Breakdown"
+    )
 
 
-    col1, col2 = st.columns(2)
+    risk_col1, risk_col2 = st.columns(2)
 
 
-    with col1:
+    with risk_col1:
 
         st.metric(
             "🧠 Mental Risk Indicator",
@@ -595,7 +785,7 @@ if st.button("🔍 Analyze with FutureMe"):
         )
 
 
-    with col2:
+    with risk_col2:
 
         st.metric(
             "🏃 Physical Risk Indicator",
@@ -607,7 +797,9 @@ if st.button("🔍 Analyze with FutureMe"):
     # RISK VISUALIZATION
     # ========================================================
 
-    st.subheader("🌱 Wellbeing Risk Visualization")
+    st.subheader(
+        "🌱 Wellbeing Risk Visualization"
+    )
 
 
     risk_percentage = min(
@@ -635,7 +827,9 @@ if st.button("🔍 Analyze with FutureMe"):
 
     st.divider()
 
-    st.header("⚙️ How FutureMe Works")
+    st.header(
+        "⚙️ How FutureMe Works"
+    )
 
 
     st.write(
