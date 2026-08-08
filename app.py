@@ -17,7 +17,7 @@ st.set_page_config(
 
 
 # ============================================================
-# LOAD MODEL
+# LOAD TRAINED MODEL
 # ============================================================
 
 model = joblib.load("futureme_model.pkl")
@@ -114,14 +114,14 @@ daily_steps = st.number_input(
 
 
 # ============================================================
-# ANALYZE
+# ANALYZE BUTTON
 # ============================================================
 
 if st.button("🔍 Analyze with FutureMe"):
 
-    # --------------------------------------------------------
-    # CREATE DATA
-    # --------------------------------------------------------
+    # ========================================================
+    # CREATE USER DATA
+    # ========================================================
 
     user_data = pd.DataFrame([{
         "Gender": gender,
@@ -137,9 +137,9 @@ if st.button("🔍 Analyze with FutureMe"):
     }])
 
 
-    # --------------------------------------------------------
-    # ENCODE CATEGORIES
-    # --------------------------------------------------------
+    # ========================================================
+    # ENCODE CATEGORICAL VARIABLES
+    # ========================================================
 
     for col in [
         "Gender",
@@ -152,9 +152,9 @@ if st.button("🔍 Analyze with FutureMe"):
         )
 
 
-    # --------------------------------------------------------
-    # FEATURE ORDER
-    # --------------------------------------------------------
+    # ========================================================
+    # KEEP EXACT TRAINING FEATURE ORDER
+    # ========================================================
 
     user_data = user_data[
         [
@@ -184,7 +184,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # MENTAL RISK
+    # MENTAL RISK INDICATOR
     # ========================================================
 
     mental_risk = (
@@ -194,7 +194,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # PHYSICAL RISK
+    # PHYSICAL RISK INDICATOR
     # ========================================================
 
     bmi_score = {
@@ -211,7 +211,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # WELLBEING SCORE
+    # COMBINED WELLBEING SCORE
     # ========================================================
 
     wellbeing_risk = (
@@ -246,31 +246,61 @@ if st.button("🔍 Analyze with FutureMe"):
     st.header("📊 FutureMe Results")
 
 
-    # --------------------------------------------------------
-    # SLEEP PREDICTION
-    # --------------------------------------------------------
+    # ========================================================
+    # RESULT DASHBOARD
+    # ========================================================
 
-    st.subheader("😴 Sleep Prediction")
-
-    st.write(
-        f"**Predicted category:** {predicted_disorder}"
-    )
+    col1, col2, col3 = st.columns(3)
 
 
-    # --------------------------------------------------------
-    # WELLBEING
-    # --------------------------------------------------------
+    with col1:
 
-    st.subheader("🌱 Wellbeing Risk")
+        st.metric(
+            "😴 Sleep Prediction",
+            predicted_disorder
+        )
 
-    st.metric(
-        "Wellbeing Risk Score",
-        f"{wellbeing_risk:.2f}"
-    )
 
-    st.write(
-        f"**Risk Level:** {risk_level}"
-    )
+    with col2:
+
+        st.metric(
+            "🌱 Wellbeing Score",
+            f"{wellbeing_risk:.2f}"
+        )
+
+
+    with col3:
+
+        st.metric(
+            "📊 Risk Level",
+            risk_level
+        )
+
+
+    # ========================================================
+    # RISK LEVEL MESSAGE
+    # ========================================================
+
+    if risk_level == "Low":
+
+        st.success(
+            "🌱 FutureMe's indicators suggest a lower "
+            "level of wellbeing risk based on the values entered."
+        )
+
+    elif risk_level == "Moderate":
+
+        st.warning(
+            "⚠️ FutureMe's indicators suggest some areas "
+            "may benefit from greater attention."
+        )
+
+    else:
+
+        st.warning(
+            "⚠️ FutureMe's indicators suggest several areas "
+            "may benefit from attention."
+        )
 
 
     # ========================================================
@@ -282,19 +312,21 @@ if st.button("🔍 Analyze with FutureMe"):
     st.header("🔎 Why did FutureMe make this prediction?")
 
     st.write(
-        "The model analyzes the information entered and "
-        "uses patterns learned from the training dataset."
+        "FutureMe uses patterns learned from its training "
+        "data to make a prediction. Explainable AI helps "
+        "show which inputs had the greatest influence on "
+        "the model's result."
     )
+
 
     try:
 
-        # Create SHAP TreeExplainer
+        # Create SHAP explainer
         explainer = shap.TreeExplainer(model)
 
         # Calculate SHAP values
         shap_result = explainer(user_data)
 
-        # Get values
         shap_values = shap_result.values
 
 
@@ -344,7 +376,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         # ----------------------------------------------------
-        # DISPLAY TOP FEATURES
+        # DISPLAY TOP FACTORS
         # ----------------------------------------------------
 
         st.subheader(
@@ -375,7 +407,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         # ----------------------------------------------------
-        # CHART
+        # FEATURE INFLUENCE CHART
         # ----------------------------------------------------
 
         st.subheader("📈 Feature Influence")
@@ -416,7 +448,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
         st.caption(
-            "This explains how the model used the "
+            "This chart explains how the model used the "
             "provided information. It does not indicate "
             "medical causation."
         )
@@ -441,6 +473,7 @@ if st.button("🔍 Analyze with FutureMe"):
     st.divider()
 
     st.header("💡 Health Awareness")
+
 
     suggestions = []
 
@@ -482,6 +515,10 @@ if st.button("🔍 Analyze with FutureMe"):
         )
 
 
+    # ========================================================
+    # DISPLAY SUGGESTIONS
+    # ========================================================
+
     if suggestions:
 
         for suggestion in suggestions:
@@ -497,7 +534,7 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # RISK BREAKDOWN
+    # RISK SCORE BREAKDOWN
     # ========================================================
 
     st.divider()
@@ -511,7 +548,7 @@ if st.button("🔍 Analyze with FutureMe"):
     with col1:
 
         st.metric(
-            "Mental Risk Indicator",
+            "🧠 Mental Risk Indicator",
             f"{mental_risk:.2f}"
         )
 
@@ -519,15 +556,77 @@ if st.button("🔍 Analyze with FutureMe"):
     with col2:
 
         st.metric(
-            "Physical Risk Indicator",
+            "🏃 Physical Risk Indicator",
             f"{physical_risk:.2f}"
         )
+
+
+    # ========================================================
+    # RISK BAR
+    # ========================================================
+
+    st.subheader("🌱 Wellbeing Risk Visualization")
+
+
+    # Keep the visualization within a sensible range
+    risk_percentage = min(
+        max(wellbeing_risk / 10, 0),
+        1
+    )
+
+
+    st.progress(
+        risk_percentage,
+        text=f"Wellbeing Risk: {wellbeing_risk:.2f} / 10"
+    )
 
 
     st.write(
         "The Mental Risk and Physical Risk values are "
         "custom indicators created for this educational "
         "prototype. They are not medically validated scores."
+    )
+
+
+    # ========================================================
+    # HOW FUTUREME WORKS
+    # ========================================================
+
+    st.divider()
+
+    st.header("⚙️ How FutureMe Works")
+
+
+    st.write(
+        """
+        **1️⃣ User Input**
+
+        The user enters information about sleep, activity,
+        stress, and other lifestyle factors.
+
+        **2️⃣ Data Processing**
+
+        FutureMe converts the information into a format
+        that the machine-learning model can understand.
+
+        **3️⃣ Machine Learning**
+
+        The trained model analyzes patterns in the data.
+
+        **4️⃣ Prediction**
+
+        FutureMe produces a predicted sleep-related category.
+
+        **5️⃣ Explainable AI**
+
+        SHAP helps identify which input features had the
+        greatest influence on the model's prediction.
+
+        **6️⃣ Health Awareness**
+
+        FutureMe provides educational awareness indicators
+        based on the information entered.
+        """
     )
 
 
