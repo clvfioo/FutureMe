@@ -47,10 +47,12 @@ st.info(
 
 st.header("📝 Enter Your Information")
 
+
 gender = st.selectbox(
     "Gender",
     ["Male", "Female"]
 )
+
 
 age = st.number_input(
     "Age",
@@ -59,10 +61,12 @@ age = st.number_input(
     value=25
 )
 
+
 occupation = st.selectbox(
     "Occupation",
     encoders["Occupation"].classes_.tolist()
 )
+
 
 sleep_duration = st.number_input(
     "Sleep Duration (hours)",
@@ -72,6 +76,7 @@ sleep_duration = st.number_input(
     step=0.1
 )
 
+
 sleep_quality = st.slider(
     "Quality of Sleep",
     min_value=1,
@@ -80,11 +85,13 @@ sleep_quality = st.slider(
     step=1
 )
 
+
 physical_activity = st.number_input(
     "Physical Activity Level",
     min_value=0,
     value=50
 )
+
 
 stress = st.slider(
     "Stress Level",
@@ -94,10 +101,12 @@ stress = st.slider(
     step=1
 )
 
+
 bmi = st.selectbox(
     "BMI Category",
     encoders["BMI Category"].classes_.tolist()
 )
+
 
 heart_rate = st.number_input(
     "Heart Rate",
@@ -105,6 +114,7 @@ heart_rate = st.number_input(
     max_value=200,
     value=75
 )
+
 
 daily_steps = st.number_input(
     "Daily Steps",
@@ -204,6 +214,7 @@ if st.button("🔍 Analyze with FutureMe"):
         "Obese": 3
     }.get(bmi, 1)
 
+
     physical_risk = (
         bmi_score +
         (10000 - daily_steps) / 5000
@@ -291,15 +302,15 @@ if st.button("🔍 Analyze with FutureMe"):
     elif risk_level == "Moderate":
 
         st.warning(
-            "⚠️ FutureMe's indicators suggest some areas "
-            "may benefit from greater attention."
+            "⚠️ FutureMe identified some areas that may "
+            "benefit from greater attention."
         )
 
     else:
 
         st.warning(
-            "⚠️ FutureMe's indicators suggest several areas "
-            "may benefit from attention."
+            "⚠️ FutureMe identified several areas that may "
+            "benefit from attention."
         )
 
 
@@ -467,56 +478,87 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # HEALTH AWARENESS
+    # PERSONALIZED HEALTH AWARENESS
     # ========================================================
 
     st.divider()
 
-    st.header("💡 Health Awareness")
+    st.header("💡 Personalized Health Awareness")
 
 
     suggestions = []
 
 
+    # --------------------------------------------------------
+    # SLEEP
+    # --------------------------------------------------------
+
     if sleep_duration < 7:
 
         suggestions.append(
-            "😴 Your entered sleep duration is below 7 hours."
+            "😴 **Sleep:** Your entered sleep duration is below "
+            "7 hours. Maintaining a consistent sleep schedule "
+            "may support better sleep habits."
         )
 
 
-    if stress >= 7:
-
-        suggestions.append(
-            "🧠 Your entered stress level is relatively high."
-        )
-
-
-    if daily_steps < 8000:
-
-        suggestions.append(
-            "🚶 Your entered daily activity level could be increased."
-        )
-
+    # --------------------------------------------------------
+    # SLEEP QUALITY
+    # --------------------------------------------------------
 
     if sleep_quality <= 5:
 
         suggestions.append(
-            "🌙 Your entered sleep quality is relatively low."
+            "🌙 **Sleep Quality:** Your entered sleep quality "
+            "is relatively low. Consider looking at factors "
+            "that may be affecting your sleep routine."
         )
 
+
+    # --------------------------------------------------------
+    # STRESS
+    # --------------------------------------------------------
+
+    if stress >= 7:
+
+        suggestions.append(
+            "🧠 **Stress:** Your entered stress level is "
+            "relatively high. Healthy stress-management "
+            "strategies such as taking breaks, relaxation "
+            "activities, or talking to someone you trust "
+            "may be helpful."
+        )
+
+
+    # --------------------------------------------------------
+    # PHYSICAL ACTIVITY
+    # --------------------------------------------------------
+
+    if daily_steps < 8000:
+
+        suggestions.append(
+            "🚶 **Physical Activity:** Your entered daily "
+            "steps are below 8,000. Adding movement "
+            "throughout the day can support an active lifestyle."
+        )
+
+
+    # --------------------------------------------------------
+    # HEART RATE
+    # --------------------------------------------------------
 
     if heart_rate > 100:
 
         suggestions.append(
-            "❤️ Your entered heart rate is relatively high. "
-            "If this is unusual for you, consider discussing "
-            "it with a qualified healthcare professional."
+            "❤️ **Heart Rate:** Your entered heart rate is "
+            "relatively high. If this is unusual for you, "
+            "consider discussing it with a qualified "
+            "healthcare professional."
         )
 
 
     # ========================================================
-    # DISPLAY SUGGESTIONS
+    # DISPLAY PERSONALIZED FEEDBACK
     # ========================================================
 
     if suggestions:
@@ -528,8 +570,8 @@ if st.button("🔍 Analyze with FutureMe"):
     else:
 
         st.success(
-            "Your entered values do not trigger any "
-            "of FutureMe's basic awareness suggestions."
+            "🌱 Based on the information entered, FutureMe "
+            "did not identify any of its basic awareness flags."
         )
 
 
@@ -562,13 +604,12 @@ if st.button("🔍 Analyze with FutureMe"):
 
 
     # ========================================================
-    # RISK BAR
+    # RISK VISUALIZATION
     # ========================================================
 
     st.subheader("🌱 Wellbeing Risk Visualization")
 
 
-    # Keep the visualization within a sensible range
     risk_percentage = min(
         max(wellbeing_risk / 10, 0),
         1
